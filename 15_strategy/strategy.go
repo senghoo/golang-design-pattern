@@ -2,23 +2,29 @@ package strategy
 
 import "fmt"
 
+type Payment struct {
+	context  *PaymentContext
+	strategy PaymentStrategy
+}
+
 type PaymentContext struct {
 	Name, CardID string
 	Money        int
-	payment      PaymentStrategy
 }
 
-func NewPaymentContext(name, cardid string, money int, payment PaymentStrategy) *PaymentContext {
-	return &PaymentContext{
-		Name:    name,
-		CardID:  cardid,
-		Money:   money,
-		payment: payment,
+func NewPayment(name, cardid string, money int, strategy PaymentStrategy) *Payment {
+	return &Payment{
+		context: &PaymentContext{
+			Name:   name,
+			CardID: cardid,
+			Money:  money,
+		},
+		strategy: strategy,
 	}
 }
 
-func (p *PaymentContext) Pay() {
-	p.payment.Pay(p)
+func (p *Payment) Pay() {
+	p.strategy.Pay(p.context)
 }
 
 type PaymentStrategy interface {
