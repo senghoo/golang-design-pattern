@@ -45,21 +45,21 @@ func (*MotherBoard) Reboot() {
 }
 
 type Box struct {
-	buttion1 Command
-	buttion2 Command
+	button1 Command
+	button2 Command
 }
 
-func NewBox(buttion1, buttion2 Command) *Box {
+func NewBox(button1, button2 Command) *Box {
 	return &Box{
-		buttion1: buttion1,
-		buttion2: buttion2,
+		button1: button1,
+		button2: button2,
 	}
 }
 
-func (b *Box) PressButtion1() {
-	b.buttion1.Execute()
+func (b *Box) PressButton1() {
+	b.button1.Execute()
 }
 
-func (b *Box) PressButtion2() {
-	b.buttion2.Execute()
+func (b *Box) PressButton2() {
+	b.button2.Execute()
 }
