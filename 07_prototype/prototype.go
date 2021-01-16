@@ -16,7 +16,7 @@ func NewPrototypeManager() *PrototypeManager {
 }
 
 func (p *PrototypeManager) Get(name string) Cloneable {
-	return p.prototypes[name]
+	return p.prototypes[name].Clone()
 }
 
 func (p *PrototypeManager) Set(name string, prototype Cloneable) {
