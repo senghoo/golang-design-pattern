@@ -19,7 +19,7 @@ func TestParallelSingleton(t *testing.T) {
 	start := make(chan struct{})
 	wg := sync.WaitGroup{}
 	wg.Add(parCount)
-	instances := [parCount]*Singleton{}
+	instances := [parCount]Singleton{}
 	for i := 0; i < parCount; i++ {
 		go func(index int) {
 			//协程阻塞，等待channel被关闭才能继续运行
@@ -37,4 +37,3 @@ func TestParallelSingleton(t *testing.T) {
 		}
 	}
 }
-
