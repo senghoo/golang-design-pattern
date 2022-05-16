@@ -61,7 +61,7 @@ func (*XMLDetailDAO) SaveOrderDetail() {
 	fmt.Print("xml detail save")
 }
 
-//XMLDAOFactory 是RDB 抽象工厂实现
+//XMLDAOFactory 是XML 抽象工厂实现
 type XMLDAOFactory struct{}
 
 func (*XMLDAOFactory) CreateOrderMainDAO() OrderMainDAO {
