@@ -5,15 +5,52 @@ import (
 	"strings"
 )
 
+type IMediator interface {
+	AddMember(string, IMember)
+	Exec(string, int)
+}
+
+type IMember interface {
+	Process(string)
+}
+
+type Mediator struct {
+	MemMap map[string]IMember
+}
+
+func (mediator *Mediator) AddMember(key string, member IMember) {
+	if mediator.MemMap == nil {
+		mediator.MemMap = make(map[string]IMember)
+	}
+	mediator.MemMap[key] = member
+}
+
+func (mediator *Mediator) Exec(key, data string) {
+	switch i := mediator.MemMap[key].(type) {
+	case *CDDriver:
+		i.Process(data)
+		mediator.Exec("CPU", data)
+	case *CPU:
+		i.Process(data)
+		mediator.Exec("VideoCard", i.Video)
+		mediator.Exec("SoundCard", i.Sound)
+	case *VideoCard:
+		i.Process(data)
+	case *SoundCard:
+		i.Process(data)
+	}
+}
+
+// Members
+
 type CDDriver struct {
 	Data string
 }
 
-func (c *CDDriver) ReadData() {
-	c.Data = "music,image"
+func (c *CDDriver) Process(data string) {
+	c.Data = data
 
 	fmt.Printf("CDDriver: reading data %s\n", c.Data)
-	GetMediatorInstance().changed(c)
 }
 
 type CPU struct {
@@ -27,51 +64,22 @@ func (c *CPU) Process(data string) {
 	c.Video = sp[1]
 
 	fmt.Printf("CPU: split data with Sound %s, Video %s\n", c.Sound, c.Video)
-	GetMediatorInstance().changed(c)
 }
 
 type VideoCard struct {
 	Data string
 }
 
-func (v *VideoCard) Display(data string) {
+func (v *VideoCard) Process(data string) {
 	v.Data = data
 	fmt.Printf("VideoCard: display %s\n", v.Data)
-	GetMediatorInstance().changed(v)
 }
 
 type SoundCard struct {
 	Data string
 }
 
-func (s *SoundCard) Play(data string) {
+func (s *SoundCard) Process(data string) {
 	s.Data = data
 	fmt.Printf("SoundCard: play %s\n", s.Data)
-	GetMediatorInstance().changed(s)
-}
-
-type Mediator struct {
-	CD    *CDDriver
-	CPU   *CPU
-	Video *VideoCard
-	Sound *SoundCard
-}
-
-var mediator *Mediator
-
-func GetMediatorInstance() *Mediator {
-	if mediator == nil {
-		mediator = &Mediator{}
-	}
-	return mediator
-}
-
-func (m *Mediator) changed(i interface{}) {
-	switch inst := i.(type) {
-	case *CDDriver:
-		m.CPU.Process(inst.Data)
-	case *CPU:
-		m.Sound.Play(inst.Sound)
-		m.Video.Display(inst.Video)
-	}
 }

@@ -1,34 +1,52 @@
 package mediator
 
-import "testing"
+import (
+	"fmt"
+	"sync"
+	"testing"
+)
 
 func TestMediator(t *testing.T) {
-	mediator := GetMediatorInstance()
-	mediator.CD = &CDDriver{}
-	mediator.CPU = &CPU{}
-	mediator.Video = &VideoCard{}
-	mediator.Sound = &SoundCard{}
+	times := 10000
+	wg := sync.WaitGroup{}
+	for i := 0; i < times; i++ {
+		wg.Add(1)
+		go func(i int) {
+			defer wg.Done()
+			media := Mediator{}
+			cDDriver := &CDDriver{}
+			cpu := &CPU{}
+			videoCard := &VideoCard{}
+			soundCard := &SoundCard{}
+			media.AddMember("CDDriver", cDDriver)
+			media.AddMember("CPU", cpu)
+			media.AddMember("VideoCard", videoCard)
+			media.AddMember("SoundCard", soundCard)
 
-	// Tiggle
-	mediator.CD.ReadData()
+			//Different goroutine input different values to verify concurrency security
+			data := fmt.Sprintf("music%d,image%d", i, i)
+			media.Exec("CDDriver", data)
 
-	if mediator.CD.Data != "music,image" {
-		t.Fatalf("CD unexpect data %s", mediator.CD.Data)
+			if cDDriver.Data != data {
+				t.Fatalf("CD unexpect data %s", cDDriver.Data)
+			}
+
+			if cpu.Sound != fmt.Sprintf("music%d", i) {
+				t.Fatalf("CPU unexpect sound data %s", cpu.Sound)
+			}
+
+			if cpu.Video != fmt.Sprintf("image%d", i) {
+				t.Fatalf("CPU unexpect video data %s", cpu.Video)
+			}
+
+			if soundCard.Data != fmt.Sprintf("music%d", i) {
+				t.Fatalf("CPU unexpect sound data %s", soundCard.Data)
+			}
+
+			if videoCard.Data != fmt.Sprintf("image%d", i) {
+				t.Fatalf("CPU unexpect video data %s", videoCard.Data)
+			}
+		}(i)
 	}
-
-	if mediator.CPU.Sound != "music" {
-		t.Fatalf("CPU unexpect sound data %s", mediator.CPU.Sound)
-	}
-
-	if mediator.CPU.Video != "image" {
-		t.Fatalf("CPU unexpect video data %s", mediator.CPU.Video)
-	}
-
-	if mediator.Video.Data != "image" {
-		t.Fatalf("VidoeCard unexpect data %s", mediator.Video.Data)
-	}
-
-	if mediator.Sound.Data != "music" {
-		t.Fatalf("SoundCard unexpect data %s", mediator.Sound.Data)
-	}
+	wg.Wait()
 }
